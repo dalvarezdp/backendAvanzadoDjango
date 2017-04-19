@@ -64,7 +64,6 @@ class LoginTest(TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.url, settings.LOGIN_REDIRECT_URL)
 
-
     def test_login_failed(self):
         response = self.client.post(reverse('login'), {'username': self.username, 'password': 'pass erronea'})
         self.assertEquals(response.status_code, 200)
