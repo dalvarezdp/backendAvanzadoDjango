@@ -9,7 +9,9 @@ from django.test import TestCase, Client, override_settings
 class HomePageTest(TestCase):
 
     def test_home_page_for_not_logged_user(self):
+        user = User.objects.create(username='david')
         client = Client()
+        client.force_login(user)  # autenticamos al usuario
         response = client.get(reverse('ui-home'))
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, "<h1>Welcome to Instageek</h1>")
@@ -19,7 +21,11 @@ class HomePageTest(TestCase):
 class ChangeLanguageTests(TestCase):
 
     def test_change_language(self):
+
+        user = User.objects.create(username='david')
+
         client = Client()
+        client.force_login(user)    #autenticamos al usuario
 
         # entramos al home por primera vez
         response = client.get(reverse('ui-home'))
