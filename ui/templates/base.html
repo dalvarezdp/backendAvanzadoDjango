@@ -1,0 +1,18 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "Instageek" %}</title>
+</head>
+<body>
+    {% block content %}{% endblock %}
+    <hr>
+    <footer>
+        {% get_available_languages as LANGUAGES %}
+        {% for language in LANGUAGES %}
+            <a href="{% url 'change-language' language.0 %}">{{ language.0|language_name_local }}</a>
+        {% endfor %}
+    </footer>
+</body>
+</html>
