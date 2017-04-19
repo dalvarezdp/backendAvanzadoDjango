@@ -7,5 +7,13 @@
 </head>
 <body>
     <h1>{% trans "Welcome to Instageek" %}</h1>
+
+    <hr>
+    <footer>
+        {% get_available_languages as LANGUAGES %}
+        {% for language in LANGUAGES %}
+            <a href="{% url 'change-language' language.0 %}">{{ language.1 }}</a>
+        {% endfor %}
+    </footer>
 </body>
 </html>
