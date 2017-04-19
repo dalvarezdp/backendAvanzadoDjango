@@ -48,13 +48,24 @@ class ChangeLanguageTests(TestCase):
 @override_settings(ROOT_URLCONF="ui.urls")
 class LoginTest(TestCase):
 
-    def test_login_success(self):
-        User.objects.create_superuser(username='david', email='david@gmail.com', password='supersegura')
+    def setUp(self):
+        self.username = 'david'
+        self.email = 'david@gmail.com'
+        self.password = 'supersegura'
 
-        client = Client()
-        response = client.get(reverse('login'))
+        User.objects.create_superuser(username=self.username, email=self.email, password=self.password)
+
+        self.client = Client()
+        response = self.client.get(reverse('login'))
         self.assertEquals(response.status_code, 200)
 
-        response = client.post(reverse('login'), {'username': 'david', 'password': 'supersegura'})
+    def test_login_success(self):
+        response = self.client.post(reverse('login'), {'username': self.username, 'password': self.password})
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.url, settings.LOGIN_REDIRECT_URL)
+
+
+    def test_login_failed(self):
+        response = self.client.post(reverse('login'), {'username': self.username, 'password': 'pass erronea'})
+        self.assertEquals(response.status_code, 200)
+        self.assertContains(response, "Your username and password didn't match. Please try again.")
