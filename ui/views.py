@@ -4,12 +4,15 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils import translation
 
+from ui.models import Post
+
 
 class HomePage(View):
 
     @method_decorator(login_required())
     def get(self, request):
-        return render(request, 'ui/home.html')
+        context = {'posts': Post.objects.all().order_by('-id')}
+        return render(request, 'ui/home.html', context)
 
 
 class ChangeLanguage(View):
