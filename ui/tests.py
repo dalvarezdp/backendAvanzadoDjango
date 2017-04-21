@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from django.test import TestCase, Client, override_settings
@@ -111,3 +112,30 @@ class LoginTest(TestCase):
         response = self.client.post(reverse('login'), {'username': self.username, 'password': 'pass erronea'})
         self.assertEquals(response.status_code, 200)
         self.assertContains(response, "Your username and password didn't match. Please try again.")
+
+
+@override_settings(ROOT_URLCONF="ui.urls")
+class CreatePostTest(TestCase):
+
+    def test_create_post(self):
+        user = User.objects.create(username='david')
+
+        client = Client()
+        client.force_login(user)  # autenticamos al usuario
+
+        # ir a la pagina del formulario de creacion
+        response = client.get(reverse('create-post'))
+        self.assertEquals(response.status_code, 200)
+
+        # enviar el formulario
+        response = client.post(reverse('create-post'), {
+            'image': SimpleUploadedFile("post.jpg", "image data".encode(), content_type="image/jpeg"),  # archivo fake
+            'description': 'Test'
+        })
+
+        # comprobar que se ha creado correctamente el post en la base de datos
+        self.assertEqual(1, Post.objects.all().count())
+
+        post = Post.objects.all().last()
+        self.assertEqual(post.owner, user)
+        self.assertEqual(post.description, 'Test')
