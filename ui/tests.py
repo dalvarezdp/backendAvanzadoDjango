@@ -145,3 +145,28 @@ class CreatePostTest(TestCase):
         post = Post.objects.all().last()
         self.assertEqual(post.owner, user)
         self.assertEqual(post.description, 'Test')
+
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.dummy.EmailBackend")
+class SendNotificationTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username="chewebacca", email="chewbacca@starwars.com")
+        self.han = User.objects.create(username="han", email="han@starwars.com")
+        self.luke = User.objects.create(username="luke", email="luke@starwars.com")
+        self.post = Post.objects.create(owner=self.user, image=File(None), description="Post1")
+
+    def test_post_is_marked_as_sent_when_sends_the_notifications(self):
+        self.assertIsNone(self.post.sent_date)
+
+        self.post.send_notifications()
+        self.assertIsNotNone(self.post.sent_date)
+
+    def test_get_users_to_notify_do_not_return_the_post_user(self):
+        users_to_notify = self.post.get_users_to_notify()
+        self.assertNotIn(self.user, users_to_notify)
+
+    def test_get_users_to_notify_returns_users_properly(self):
+        users_to_notify = self.post.get_users_to_notify()
+        self.assertIn(self.han, users_to_notify)
+        self.assertIn(self.luke, users_to_notify)
