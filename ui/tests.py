@@ -117,6 +117,12 @@ class LoginTest(TestCase):
 @override_settings(ROOT_URLCONF="ui.urls")
 class CreatePostTest(TestCase):
 
+    def test_not_logged_user_is_sent_to_login_page(self):
+        client = Client()
+        response = client.get(reverse('create-post'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(settings.LOGIN_REDIRECT_URL in response.url)
+
     def test_create_post(self):
         user = User.objects.create(username='david')
 
