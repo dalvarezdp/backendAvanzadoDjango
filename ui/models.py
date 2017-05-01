@@ -1,3 +1,4 @@
+from celery import shared_task
 from django.contrib.auth.models import User
 from django.core.mail import send_mass_mail
 from django.db import models
@@ -29,6 +30,24 @@ class Post(models.Model):
     def get_users_to_notify(self):
         return User.objects.exclude(pk=self.owner.pk)
 
+    def save(self, *args, **kwargs):
+        super(Post, self).save(*args, **kwargs)
+        if self.sent_date is None:
+            # send_notifications_for_post(self.pk)  # mandamos las notificaciones de manera síncrona
+            send_notifications_for_post.delay(self.pk)  # mandamos a celery la tarea de enviar las notificaciones en background
+
     def __str__(self):
         return self.image.url
+
+
+@shared_task
+def send_notifications_for_post(post_id):
+    try:
+        post = Post.objects.get(pk=post_id)
+        print("Sending post {0} notifications...".format(post.pk))
+        post.send_notifications()
+        print("Finished")
+    except Post.DoesNotExist:
+        print("Post {0} does not exist".format(post.pk))
+
 

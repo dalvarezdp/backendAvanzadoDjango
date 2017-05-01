@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import os
+
+import time
 from celery import Celery, shared_task
 
 # set the default Django settings module for the 'celery' program.
@@ -23,4 +25,6 @@ def debug_task(self):
 
 @shared_task
 def helloworld(name):
+    print("Sleeping...")
+    time.sleep(5)
     print("Hello from Celery {0}".format(name))
